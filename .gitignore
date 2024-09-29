@@ -1,0 +1,7 @@
+<<<<<<< HEAD
+.env
+=======
+.env
+node_modules
+>>>>>>> 4ec0d9a (Initial commit)
+node_modules
