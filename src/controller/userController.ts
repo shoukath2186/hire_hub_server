@@ -74,13 +74,13 @@ class UserController {
             httpOnly: true, 
             maxAge: 10 * 24 * 60 * 60 * 1000, 
             secure: true,
-            sameSite: 'none', 
+            sameSite: 'strict', 
           });
           res.cookie('accessToken', createToken.accessToken, { 
             httpOnly: true, 
             maxAge: 1 * 60 * 60 * 1000,  
             secure: true,
-            sameSite: 'none', 
+            sameSite: 'strict', 
           });
           return res.status(200).json(User);
 
@@ -151,14 +151,14 @@ class UserController {
           httpOnly: true, 
           maxAge: 10 * 24 * 60 * 60 * 1000, 
           secure: true,
-          sameSite: 'none', 
+          sameSite: 'strict', 
         });
 
          res.cookie('accessToken', accessToken, { 
           httpOnly: true, 
           maxAge: 1 * 60 * 60 * 1000,  
           secure: true,
-          sameSite: 'none', 
+          sameSite: 'strict', 
         });
         //  console.log(978654,createToken);
          return res.status(200).json(UserData);
@@ -256,20 +256,20 @@ class UserController {
           httpOnly: true, 
           maxAge: 10 * 24 * 60 * 60 * 1000, 
           secure: true,
-          sameSite: 'none', 
+          sameSite: 'strict', 
         });
 
          res.cookie('accessToken', accessToken, { 
           httpOnly: true, 
           maxAge: 1 * 60 * 60 * 1000,  
           secure: true,
-          sameSite: 'none', 
+          sameSite: 'strict', 
         });
         
          return res.status(200).json(UserData);
 
       }else{   
-      
+     
       const user = await this._userUsecase.signupGoogle(req.body);
 
     

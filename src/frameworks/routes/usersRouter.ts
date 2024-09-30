@@ -89,7 +89,7 @@ userRouter.post('/logout',async(req,res,next)=>{
   
 });
 
-userRouter.post('/loginGoogle',async(req,res,next)=>{
+userRouter.post('/loginGoogle',async(req,res,next)=>{ 
   
   userController.googleLogin(req,res,next);
   

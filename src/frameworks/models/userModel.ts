@@ -9,7 +9,7 @@ const userSchema: Schema<User & Document> = new Schema({
   },
   last_name: {
     type: String,
-    required: true,
+    default:'',
   },
   phone: {
     type: Number,
