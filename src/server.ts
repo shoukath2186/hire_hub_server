@@ -52,7 +52,7 @@ io.on('connection', (socket: Socket) => {
   socket.on('join chat', (room: string) => {
 
     socket.join(room);
- 
+
   })
   socket.on('delete Messsage', (data: any) => {
     if (!data.users) return console.log('users not difained.');
@@ -81,55 +81,55 @@ io.on('connection', (socket: Socket) => {
 
   //video call manegement
   socket.on('video-call', (data: { signal: any, chatId: string, to: string, user: string, userId: string }) => {
-   
-    const recipientSocket=onlineUsers.get(data.to)
+
+    const recipientSocket = onlineUsers.get(data.to)
     // console.log('creted-call',data);
-    
-    if(recipientSocket){
-      recipientSocket.emit('video-call-signal', { 
-        signal: data.signal, 
-        chatId: data.chatId,  
-        from: socket.id,     
-        user: data.user,       
-        userId: data.userId   
-    });
-    }else{
+
+    if (recipientSocket) {
+      recipientSocket.emit('video-call-signal', {
+        signal: data.signal,
+        chatId: data.chatId,
+        from: socket.id,
+        user: data.user,
+        userId: data.userId
+      });
+    } else {
       console.log(`User ${data.to} is not online.`);
     }
-    
+
   })
 
-  socket.on('reject-call',(data:any)=>{
+  socket.on('reject-call', (data: any) => {
     io.to(data.userId).emit('rejected-call-receiver');
-    
-  })
-  socket.on('accept-call',(data:{ rejecter: string, from:string, signal:any, user:string,userId:string })=>{
-   
-    io.to(data.userId).emit('accept-call-recever',(data));
-  })
-  socket.on('returning-signal',(data:{signal: any, to: string})=>{
 
-    io.to(data.to).emit('incoming-signal',{signal:data.signal,from:socket.id})
+  })
+  socket.on('accept-call', (data: { rejecter: string, from: string, signal: any, user: string, userId: string }) => {
+
+    io.to(data.userId).emit('accept-call-recever', (data));
+  })
+  socket.on('returning-signal', (data: { signal: any, to: string }) => {
+
+    io.to(data.to).emit('incoming-signal', { signal: data.signal, from: socket.id })
   })
 
 
-  socket.on('end-call',(data:any)=>{
-     io.to(data.to).emit('call-ended') 
+  socket.on('end-call', (data: any) => {
+    io.to(data.to).emit('call-ended')
   })
-  socket.on('ice-candidate',(data:any)=>{
-    const {candidate,to}=data;
+  socket.on('ice-candidate', (data: any) => {
+    const { candidate, to } = data;
     const recipientSocket = onlineUsers.get(to);
-    if(recipientSocket){
-      recipientSocket.emit('ice-candidate',{
-        candidate:candidate,
-        from:socket.id
+    if (recipientSocket) {
+      recipientSocket.emit('ice-candidate', {
+        candidate: candidate,
+        from: socket.id
       })
     }
-    
-  })
-  
 
-  socket.on('disconnect', () => { 
+  })
+
+
+  socket.on('disconnect', () => {
     for (const [userId, userSocket] of onlineUsers.entries()) {
       if (userSocket === socket) {
         onlineUsers.delete(userId)

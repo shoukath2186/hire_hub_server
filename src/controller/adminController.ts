@@ -37,14 +37,14 @@ class AdminController {
             httpOnly: true,
             maxAge: 10 * 24 * 60 * 60 * 1000,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
          });
 
          res.cookie('AdminAccessToken', accessToken, {
             httpOnly: true,
             maxAge: 1 * 60 * 60 * 1000,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
          });
 
 
