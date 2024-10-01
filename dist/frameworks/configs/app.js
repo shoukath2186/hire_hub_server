@@ -20,7 +20,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
 //cors
 const allowedOrigins = [
-    'http://localhost:5173',
+    'https://hire-hub-admin.vercel.app',
     'https://hire-hub-user-side.vercel.app'
 ];
 app.use((0, cors_1.default)({
