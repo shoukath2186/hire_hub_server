@@ -18,12 +18,13 @@ const server = app.listen(PORT, () => {
 
 });
 
-const io = require('socket.io')(server, {
-  pingTimereout: 6000,
+
+const io = new Server(server, {
+  pingTimeout: 6000,  
   cors: {
-    origin: 'http://localhost:5000'
-  }
-})
+    origin: 'https://vercel.com/shoukath-ots-projects/hire-hub-user-side',
+  },
+});
 
 const onlineUsers: Map<string, Socket> = new Map();
 
