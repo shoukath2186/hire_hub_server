@@ -21,7 +21,7 @@ app.use((0, cookie_parser_1.default)());
 //cors
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://vercel.com/shoukath-ots-projects/hire-hub-user-side'
+    'https://hire-hub-user-side.vercel.app'
 ];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
