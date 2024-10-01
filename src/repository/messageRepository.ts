@@ -4,6 +4,7 @@ import { ObjectId } from "mongoose";
 import Chats from '../frameworks/models/chatModel'
 import Message from "../frameworks/models/messageModel";
 import NotificationModel from "../frameworks/models/notificationModel";
+import { log } from "console";
 
 class MessageRepository {
 
@@ -78,7 +79,7 @@ class MessageRepository {
         }
     }
     async fetchChat(userId: string | ObjectId) {
-
+       
         try {
 
             const result = await Chats.find({ users: { $elemMatch: { $eq: userId } } })
@@ -86,12 +87,12 @@ class MessageRepository {
                 .populate("groupAdmin", 'user_name email user_role profilePicture')
                 .populate('lastMessage')
                 .sort({ updatedAt: -1 })
-
+            
             const data = await UserModel.populate(result, {
                 path: 'lastMessage.sender',
                 select: "user_name email user_role profilePicture"
             })
-            
+
                 return data
 
 

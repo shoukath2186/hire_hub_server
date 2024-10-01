@@ -1,5 +1,5 @@
 
-import AdminRepo from "../usecase/interfaces/admin/IAdminRepo";
+// import AdminRepo from "../usecase/interfaces/admin/IAdminRepo";
 import UserModel from "../frameworks/models/userModel";
 import AdminModel from "../frameworks/models/admin";
 import CategoryModal from "../frameworks/models/categoryModel";
@@ -7,7 +7,7 @@ import { AdminData } from "../usecase/interfaces/admin/IAdminData";
 import JobModel from "../frameworks/models/JobModel";
 
 
-class AdminRepository implements AdminRepo {
+class AdminRepository{
 
   async findAdmin(email: string) {
     const adminData = await AdminModel.findOne({ email: email });

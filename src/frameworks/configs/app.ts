@@ -1,7 +1,7 @@
 
 import  express,{ Express }  from "express";
 import cors from 'cors';
-import cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser' 
 
 
 import adminRouter from "../routes/adminRouter";

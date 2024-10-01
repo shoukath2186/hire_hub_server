@@ -41,7 +41,7 @@ messageRouter.post('/',ProtectRouter,(req,res,next)=>{
 })
 messageRouter.get('/allChat',ProtectRouter,(req,res,next)=>{
 
-    messageController.fetchChat(req,res,next);
+    messageController.fetchChat(req,res,next); 
 })
 messageRouter.post('/message',ProtectRouter,(req,res,next)=>{
 
@@ -73,7 +73,7 @@ messageRouter.put('/delete',ProtectRouter,(req,res,next)=>{
 })
 messageRouter.patch('/blockChat',ProtectRouter,(req,res,next)=>{
 
-    messageController.blockChat(req,res,next)
+    messageController.blockChat(req,res,next) 
 })
 
 

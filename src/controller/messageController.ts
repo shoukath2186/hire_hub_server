@@ -62,6 +62,8 @@ class MessageController{
     }
     async fetchChat(req:CustomRequest,res:Response,next:NextFunction){
         try {
+            // console.log();
+            
             if(req.user){
                 const response=await this._messageUseCase.FetchChat(req.user);
                 if(response.status==200){

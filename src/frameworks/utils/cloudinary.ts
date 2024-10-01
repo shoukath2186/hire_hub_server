@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { Upload } from "@aws-sdk/lib-storage";
 import mime from 'mime-types';
+import { buffer } from 'stream/consumers';
 
 // import {} from '../middlewares/uploads'
 
@@ -16,7 +17,7 @@ const s3Client = new S3Client({
 });
 
 class S3Service {
-  async saveS3Image(file: any): Promise<string> {
+  async saveS3Image(file: any) {
     try {
       const processedImagePath = path.join(__dirname, 'processed_image.jpg');
 
@@ -57,10 +58,9 @@ class S3Service {
     }
   }
 
-  async saveAudioFile(file: Express.Multer.File): Promise<string> {
+  async saveAudioFile(file: any) { 
     try {
      
-
         const bucketName = process.env.S3_BUCKET_NAME as string;
         const region = process.env.AWS_REGION as string;
        
@@ -70,16 +70,16 @@ class S3Service {
 
         const s3Client = new S3Client({ region });
 
-       
+        
         let body;
         if (file.buffer) {
-            body = file.buffer;
+            body =await file.buffer;
         } else if (file.path) {
-            body = fs.createReadStream(file.path);
+            body =fs.createReadStream(file.path);
         } else {
             throw new Error('No valid file data found');
         }
-
+       
         const upload = new Upload({
             client: s3Client,
             params: {
@@ -96,13 +96,14 @@ class S3Service {
         fs.unlinkSync(file.path)
 
         const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`;
+       
         return publicUrl;
     } catch (error) {
         console.error('Error uploading audio to S3:', error);
         throw new Error('Error uploading audio to S3');
      }
 }
-  async saveS3Resume(file: any): Promise<string> {
+  async saveS3Resume(file: any) {
     try {
       const fileStream = fs.createReadStream(file.path);
       const bucketName = process.env.S3_BUCKET_NAME as string;
@@ -134,7 +135,7 @@ class S3Service {
     }
   }
 
-  async saveVideoFile(file: Express.Multer.File): Promise<string> {
+  async saveVideoFile(file: any) {
     try {
       const bucketName = process.env.S3_BUCKET_NAME as string;
       const region = process.env.AWS_REGION as string;
@@ -182,7 +183,7 @@ class S3Service {
     }
 }
 
-async saveImageFile(file: Express.Multer.File): Promise<string> {
+async saveImageFile(file: any) {
   try {
     const bucketName = process.env.S3_BUCKET_NAME as string;
     const region = process.env.AWS_REGION as string;

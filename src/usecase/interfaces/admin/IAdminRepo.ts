@@ -1,11 +1,11 @@
 import User from "../../../entities/user";
 
 
-interface AdminRepo{
-    findAdmin(email: string);
+// interface AdminRepo{
+//     findAdmin(email: any);
 
-    ///drtfyghjk
-}
+//     ///drtfyghjk
+// }
 
-export default AdminRepo
+// export default AdminRepo
 
