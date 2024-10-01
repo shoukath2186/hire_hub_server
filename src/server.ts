@@ -22,7 +22,7 @@ const server = app.listen(PORT, () => {
 const io = new Server(server, {
   pingTimeout: 6000,  
   cors: {
-    origin: 'https://vercel.com/shoukath-ots-projects/hire-hub-user-side',
+    origin: 'https://hire-hub-user-side.vercel.app',
   },
 });
 
