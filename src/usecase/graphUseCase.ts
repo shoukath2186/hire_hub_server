@@ -11,7 +11,7 @@ class GraphUseCase{
     const data=await this._graphRepository.createGarphData()
     if(data){
         return{
-            status:200,
+            status:200,            
             data:data
         }
     }
