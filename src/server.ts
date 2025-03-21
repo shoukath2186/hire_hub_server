@@ -22,14 +22,14 @@ const server = app.listen(PORT, () => {
 const io = new Server(server, {
   pingTimeout: 6000,  
   cors: {
-    origin: 'https://hire-hub-user-side.vercel.app',
+    origin: 'http://localhost:5000',   
   },
 });
 
 const onlineUsers: Map<string, Socket> = new Map();
 
 io.on('connection', (socket: Socket) => {
-
+  
   socket.on('setup', (userData: SocketUser) => {
 
 

@@ -18,13 +18,13 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // cookie parser
 app.use((0, cookie_parser_1.default)());
-//cors
 const allowedOrigins = [
     'https://hire-hub-admin.vercel.app',
-    'https://hire-hub-user-side.vercel.app'
+    'http://localhost:5000', // Fixed typo
 ];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
+        console.log("Incoming Origin: ", origin);
         if (!origin)
             return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {

@@ -29,17 +29,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./frameworks/configs/app"));
 const db_1 = __importDefault(require("./frameworks/configs/db"));
 const dotenv = __importStar(require("dotenv"));
+const socket_io_1 = require("socket.io");
 dotenv.config();
 (0, db_1.default)();
 const PORT = process.env.PORT || 3030;
 const server = app_1.default.listen(PORT, () => {
     console.log(`server started running ${PORT}`);
 });
-const io = require('socket.io')(server, {
-    pingTimereout: 6000,
+const io = new socket_io_1.Server(server, {
+    pingTimeout: 6000,
     cors: {
-        origin: 'http://localhost:5000'
-    }
+        origin: 'http://localhost:5000',
+    },
 });
 const onlineUsers = new Map();
 io.on('connection', (socket) => {

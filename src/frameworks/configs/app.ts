@@ -21,27 +21,25 @@ app.use(express.urlencoded({ extended: true }));
 // cookie parser
 app.use(cookieParser())
 
-//cors
 const allowedOrigins = [
   'https://hire-hub-admin.vercel.app',
-  'https://hire-hub-user-side.vercel.app'
+  'http://localhost:5000', // Fixed typo
 ];
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log("Origin: ", origin);
-      if (!origin) return callback(null, true); 
+      console.log("Incoming Origin: ", origin);
+      if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg = 'The CORS policy for this site does not allow access from the specified origin.';
         return callback(new Error(msg), false);
       }
       return callback(null, true);
     },
-    credentials: true, 
+    credentials: true,
   })
 );
-
-
 // Routes
 app.use("/user", userRouter);
 app.use('/admin',adminRouter);
