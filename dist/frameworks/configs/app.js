@@ -20,7 +20,8 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
 const allowedOrigins = [
     'https://hire-hub-admin.vercel.app',
-    'http://localhost:5000', // Fixed typo
+    // 'http://localhost:5000', // Fixed typo
+    'https://hire-hub-usersidefinal.vercel.app'
 ];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
