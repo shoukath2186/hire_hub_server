@@ -23,7 +23,8 @@ app.use(cookieParser())
 
 const allowedOrigins = [
   'https://hire-hub-admin.vercel.app',
-  'http://localhost:5000', // Fixed typo
+  // 'http://localhost:5000', // Fixed typo
+  "https://hire-hub-usersidefinal.vercel.app"
 ];
 
 app.use(
