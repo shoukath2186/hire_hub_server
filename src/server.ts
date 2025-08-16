@@ -16,10 +16,10 @@ const server = app.listen(PORT, () => {
 
   console.log(`server started running ${PORT}`);
 
-});
+}); 
 
 
-const io = new Server(server, {
+const io = new Server(server, { 
   pingTimeout: 6000,  
   cors: {
     origin: 'http://localhost:5000',   

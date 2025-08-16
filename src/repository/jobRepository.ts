@@ -3,14 +3,14 @@ import mongoose, { ObjectId, Types } from "mongoose";
 import CategoryModal from "../frameworks/models/categoryModel";
 import JobModel from "../frameworks/models/JobModel";
 import ApplicationModel from "../frameworks/models/applicationModel";
-import JobProfileModal from '../frameworks/models/profileModel'; 
+import JobProfileModal from '../frameworks/models/profileModel';
 
 
 class JobRepository {
 
     async findCategory() {
 
-        const allCalegory = await CategoryModal.find({is_block:false}, { _id: 1, name: 1 }) 
+        const allCalegory = await CategoryModal.find({ is_block: false }, { _id: 1, name: 1 })
 
         if (allCalegory) {
 
@@ -103,7 +103,7 @@ class JobRepository {
         try {
             const limitValue: number = Number(limit);
             const allJob = await JobModel.aggregate([
-                {$match:{is_blocked:false}},
+                { $match: { is_blocked: false } },
                 {
                     $addFields: { employerIdAsObjectId: { $toObjectId: "$employer_id" } }
                 },
@@ -150,94 +150,125 @@ class JobRepository {
     }
     async searchJob(data: any) {
         try {
-            const { key, category, location } = data;
+            const { key, category, location, page = 1, limit = 9 } = data;
+
             const pipeline: any[] = [];
             const matchCriteria: any[] = [];
-        
+
+            // ❌ Exclude blocked jobs
+            matchCriteria.push({ is_blocked: false });
+
+            // 🔍 Keyword search (title, description, skill)
             if (key) {
                 matchCriteria.push({
                     $or: [
                         { title: { $regex: key, $options: "i" } },
-                        { description: { $regex: key, $options: "i" } }
+                        { description: { $regex: key, $options: "i" } },
+                        { skill: { $regex: key, $options: "i" } } // skill is array, still works
                     ]
                 });
             }
-        
+
+            // 📂 Category filter
             if (category) {
                 matchCriteria.push({
                     category: { $regex: category, $options: "i" }
                 });
             }
-        
+
+            // 📍 Location filter
             if (location) {
                 matchCriteria.push({
                     location: { $regex: location, $options: "i" }
                 });
             }
-        
-            
-            if (matchCriteria.length > 0) {
-                pipeline.push({ $match: { $and: matchCriteria } });
-            } else {
-               
-                pipeline.push({ $match: {} });
-            }
-        
+
+            // ✅ Apply all filters
+            pipeline.push({ $match: { $and: matchCriteria } });
+
+            // 🔗 Join with employer (users collection)
             pipeline.push(
                 {
-                    $addFields: { employerIdAsObjectId: { $toObjectId: "$employer_id" } }
-                },
-                {
-                    $lookup: { from: 'users', localField: 'employerIdAsObjectId', foreignField: '_id', as: 'employerDetails' }
-                },
-                {
-                    $unwind: { path: '$employerDetails', preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $project: {
-                        name: 1, contact: 1, location: 1, salary: 1, title: 1, job_type: 1, category: 1, skill: 1,
-                        education: 1, description: 1, applications: 1, logo: 1, createdAt: 1, updatedAt: 1,
-                        employerDetails: { profilePicture: 1, _id: 1 }
+                    $addFields: {
+                        employerIdAsObjectId: { $toObjectId: "$employer_id" }
                     }
                 },
-                { $limit: 9 },
-                { $sort: { _id: -1 } }
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "employerIdAsObjectId",
+                        foreignField: "_id",
+                        as: "employerDetails"
+                    }
+                },
+                { $unwind: { path: "$employerDetails", preserveNullAndEmptyArrays: true } },
+
+                // ✂️ Select only required fields
+                {
+                    $project: {
+                        name: 1,
+                        contact: 1,
+                        location: 1,
+                        salary: 1,
+                        title: 1,
+                        job_type: 1,
+                        category: 1,
+                        skill: 1,
+                        education: 1,
+                        description: 1,
+                        applications: 1,
+                        logo: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        "employerDetails.profilePicture": 1,
+                        "employerDetails._id": 1
+                    }
+                },
+
+                // 🕒 Sort newest first
+                { $sort: { createdAt: -1 } },
+
+                // 📄 Pagination
+                // { $skip: (page - 1) * limit },
+                { $limit: limit }
             );
-        
+
+            // ⚡ Execute query
             const jobs = await JobModel.aggregate(pipeline).exec();
-        
-            return jobs;
-        
+
+
+            return jobs
+
         } catch (error) {
             console.log('Error in job repository:', error);
             throw new Error('Job repository failed');
         }
-        
+
     }
     async createApplication(cover: string, userId: string | ObjectId, employerId: string, jobId: string) {
         try {
-             
-            const jobProfile=await JobProfileModal.findOne({userId:userId})
 
-            if(jobProfile){
-            
+            const jobProfile = await JobProfileModal.findOne({ userId: userId })
 
-            await JobModel.updateOne({ _id: jobId }, { $push: { applications: userId } });
+            if (jobProfile) {
 
-            const Application = new ApplicationModel({
-                coverLetter: cover,
-                profileId: userId,
-                employerId: employerId,
-                jobId: jobId
-            })
 
-            const newApplication = await Application.save()
-            if (newApplication) {
-                return true
+                await JobModel.updateOne({ _id: jobId }, { $push: { applications: userId } });
+
+                const Application = new ApplicationModel({
+                    coverLetter: cover,
+                    profileId: userId,
+                    employerId: employerId,
+                    jobId: jobId
+                })
+
+                const newApplication = await Application.save()
+                if (newApplication) {
+                    return true
+                }
+                return false
             }
             return false
-        }
-        return false
 
         } catch (error) {
             console.log('Error in job repository:', error);
@@ -249,10 +280,10 @@ class JobRepository {
         try {
 
             const objectId = mongoose.Types.ObjectId.isValid(Id) ? new mongoose.Types.ObjectId(Id) : null;
-         
+
 
             const response = await ApplicationModel.findOne({ jobId: objectId, profileId: userId })
-            
+
 
             if (response) {
                 return true
@@ -265,38 +296,38 @@ class JobRepository {
 
         }
     }
-    async takeApplications(userId: string | ObjectId|any) {
-       
+    async takeApplications(userId: string | ObjectId | any) {
+
         try {
-            const objectId= new mongoose.Types.ObjectId(userId)
-            
+            const objectId = new mongoose.Types.ObjectId(userId)
+
             const applications = await ApplicationModel.aggregate([
                 {
-                  $match: { employerId: objectId }, 
-                },{
+                    $match: { employerId: objectId },
+                }, {
                     $addFields: { profileIdStr: { $toString: "$profileId" } }
                 },
                 {
-                  $lookup: { from: 'users',localField: 'profileId',  foreignField: '_id',as: 'profile', },
+                    $lookup: { from: 'users', localField: 'profileId', foreignField: '_id', as: 'profile', },
                 },
                 {
-                  $lookup: {from: 'jobs',localField: 'jobId',foreignField: '_id',as: 'job',},
+                    $lookup: { from: 'jobs', localField: 'jobId', foreignField: '_id', as: 'job', },
                 },
                 {
-                  $lookup: {from: 'users', localField: 'employerId', foreignField: '_id',as: 'employer',},
-                }, {$unwind: '$profile', },
-                { $unwind: '$job',},
-                {$unwind: '$employer', },
+                    $lookup: { from: 'users', localField: 'employerId', foreignField: '_id', as: 'employer', },
+                }, { $unwind: '$profile', },
+                { $unwind: '$job', },
+                { $unwind: '$employer', },
                 {
-                  $project: {_id: 1,jobTitle: '$job.title',applicantName: '$profile.user_name',email: '$profile.email',appliedDate: '$createdAt',status: 1,},
-                },{$sort:{_id:-1}}
+                    $project: { _id: 1, jobTitle: '$job.title', applicantName: '$profile.user_name', email: '$profile.email', appliedDate: '$createdAt', status: 1, },
+                }, { $sort: { _id: -1 } }
             ]);
-              
-              if(applications){
+
+            if (applications) {
                 return applications
-              }
-              return false
-              
+            }
+            return false
+
 
         } catch (error) {
             console.log('Error in job repository:', error);
@@ -304,30 +335,30 @@ class JobRepository {
         }
 
     }
-    async updateStatus(id:any,status:any){
+    async updateStatus(id: any, status: any) {
         try {
-            const update=await ApplicationModel.updateOne({_id:id},{$set:{status:status}})
-            if(update.modifiedCount==1){
+            const update = await ApplicationModel.updateOne({ _id: id }, { $set: { status: status } })
+            if (update.modifiedCount == 1) {
                 return true
             }
             return false
-           
-        }catch(error){
+
+        } catch (error) {
             console.log('Error in job repository:', error);
             throw new Error('Job repository failed');
         }
     }
-    async getProfile(id:any){
+    async getProfile(id: any) {
         try {
-          const application:any=await ApplicationModel.findById(id)
-          const Profile=await JobProfileModal.findOne({userId:application.profileId})
-          if(Profile){
-            return Profile
-          }else{
-            return false
-          };
-          
-            
+            const application: any = await ApplicationModel.findById(id)
+            const Profile = await JobProfileModal.findOne({ userId: application.profileId })
+            if (Profile) {
+                return Profile
+            } else {
+                return false
+            };
+
+
         } catch (error) {
             console.log('Error in job repository:', error);
             throw new Error('Job repository failed');

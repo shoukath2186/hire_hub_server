@@ -39,11 +39,11 @@ class S3Service {
         Key: fileKey,
         Body: fileStream,
         ContentType: 'image/jpeg',
-        ACL: 'public-read',
+        // ACL: 'public-read',
       };
 
      
-      await s3Client.send(new PutObjectCommand(uploadParams));
+      await s3Client.send(new PutObjectCommand(uploadParams)); 
 
       
       fs.unlinkSync(processedImagePath);

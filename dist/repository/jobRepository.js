@@ -167,46 +167,75 @@ class JobRepository {
     searchJob(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { key, category, location } = data;
+                const { key, category, location, page = 1, limit = 9 } = data;
                 const pipeline = [];
                 const matchCriteria = [];
+                // ❌ Exclude blocked jobs
+                matchCriteria.push({ is_blocked: false });
+                // 🔍 Keyword search (title, description, skill)
                 if (key) {
                     matchCriteria.push({
                         $or: [
                             { title: { $regex: key, $options: "i" } },
-                            { description: { $regex: key, $options: "i" } }
+                            { description: { $regex: key, $options: "i" } },
+                            { skill: { $regex: key, $options: "i" } } // skill is array, still works
                         ]
                     });
                 }
+                // 📂 Category filter
                 if (category) {
                     matchCriteria.push({
                         category: { $regex: category, $options: "i" }
                     });
                 }
+                // 📍 Location filter
                 if (location) {
                     matchCriteria.push({
                         location: { $regex: location, $options: "i" }
                     });
                 }
-                if (matchCriteria.length > 0) {
-                    pipeline.push({ $match: { $and: matchCriteria } });
-                }
-                else {
-                    pipeline.push({ $match: {} });
-                }
+                // ✅ Apply all filters
+                pipeline.push({ $match: { $and: matchCriteria } });
+                // 🔗 Join with employer (users collection)
                 pipeline.push({
-                    $addFields: { employerIdAsObjectId: { $toObjectId: "$employer_id" } }
-                }, {
-                    $lookup: { from: 'users', localField: 'employerIdAsObjectId', foreignField: '_id', as: 'employerDetails' }
-                }, {
-                    $unwind: { path: '$employerDetails', preserveNullAndEmptyArrays: true }
-                }, {
-                    $project: {
-                        name: 1, contact: 1, location: 1, salary: 1, title: 1, job_type: 1, category: 1, skill: 1,
-                        education: 1, description: 1, applications: 1, logo: 1, createdAt: 1, updatedAt: 1,
-                        employerDetails: { profilePicture: 1, _id: 1 }
+                    $addFields: {
+                        employerIdAsObjectId: { $toObjectId: "$employer_id" }
                     }
-                }, { $limit: 9 }, { $sort: { _id: -1 } });
+                }, {
+                    $lookup: {
+                        from: "users",
+                        localField: "employerIdAsObjectId",
+                        foreignField: "_id",
+                        as: "employerDetails"
+                    }
+                }, { $unwind: { path: "$employerDetails", preserveNullAndEmptyArrays: true } }, 
+                // ✂️ Select only required fields
+                {
+                    $project: {
+                        name: 1,
+                        contact: 1,
+                        location: 1,
+                        salary: 1,
+                        title: 1,
+                        job_type: 1,
+                        category: 1,
+                        skill: 1,
+                        education: 1,
+                        description: 1,
+                        applications: 1,
+                        logo: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        "employerDetails.profilePicture": 1,
+                        "employerDetails._id": 1
+                    }
+                }, 
+                // 🕒 Sort newest first
+                { $sort: { createdAt: -1 } }, 
+                // 📄 Pagination
+                // { $skip: (page - 1) * limit },
+                { $limit: limit });
+                // ⚡ Execute query
                 const jobs = yield JobModel_1.default.aggregate(pipeline).exec();
                 return jobs;
             }
